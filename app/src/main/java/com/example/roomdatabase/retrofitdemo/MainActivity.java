@@ -34,7 +34,46 @@ public class MainActivity extends AppCompatActivity {
         jsonPlaceHolderApi = retrofit.create(JsonPlaceHolderApi.class);
 
 //        getPosts();
-        getComments();
+//        getComments();
+        createPost();
+    }
+
+    private void createPost() {
+        Post post = new Post(23,"New Title","New text");
+//        Call<Post> call = jsonPlaceHolderApi.createPost(post);
+//        Call<Post> call = jsonPlaceHolderApi.createPost(23,"New Title","New text");
+        Map<String, String> fields = new HashMap<>();
+        fields.put("userId","25");
+        fields.put("title","New Title");
+
+        Call<Post> call = jsonPlaceHolderApi.createPost(fields);
+
+        call.enqueue(new Callback<Post>() {
+            @Override
+            public void onResponse(Call<Post> call, Response<Post> response) {
+                if(!response.isSuccessful())
+                {
+                    textViewResult.setText("Code : "+response.code());
+                    return;
+                }
+
+                Post responsePost = response.body();
+
+                String content = "";
+                content+= "Code : " + response.code() + "\n";
+                content+= "ID : " + responsePost.getId() + "\n";
+                content+= "User ID : "+responsePost.getUserId() + "\n";
+                content+= "Title : "+responsePost.getTitle() + "\n";
+                content+= "Text : "+responsePost.getText()+"\n\n";
+
+                textViewResult.append(content);
+            }
+
+            @Override
+            public void onFailure(Call<Post> call, Throwable t) {
+                textViewResult.setText(t.getMessage());
+            }
+        });
     }
 
 
@@ -45,12 +84,7 @@ public class MainActivity extends AppCompatActivity {
         parameter.put("_order","desc");
 
 
-//        Call<List<Post>> call = jsonPlaceHolderApi.getPosts(new Integer[]{2,3,6},"id","desc");
-
-        // TODO: 15-05-2020 Pass parameter as query map
         Call<List<Post>> call = jsonPlaceHolderApi.getPosts(parameter);
-        // TODO: 15-05-2020 if you don't want to pass sort and order by then pass null it will ignored by retrofit
-//        Call<List<Post>> call = jsonPlaceHolderApi.getPosts(4,null,null);
 
         call.enqueue(new Callback<List<Post>>() {
             @Override
